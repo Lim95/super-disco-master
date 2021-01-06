@@ -1,82 +1,169 @@
+var tasks = {};
 const BEFORE = 0;
 const AFTER = 1;
-var tasks = {};
+const OPENHOUR = 9;
+const CLOSEHOUR = 17;
 var backgroundFlag = BEFORE;
+var operationHours = 8;
+var openingHour = 9;
+var hoursIncrement = 1;
+var closingHour = 17;
 
-$("#currentDay").text(moment().format("dddd, MMMM Do YYYY, h:mm:ss a"));
-setInterval(function () {
+// hour converter
+function getOperatingHours(hours) {
+    var result;
+    if (hours < 12) {
+        result = hours.toString() + "AM";
+    }
+    else if (hours === 12 ){
+        result = hours.toString() + "PM";
+    }
+    else {
+        result = (hours-12).toString() + "PM";
+    }
+    return result;
+};
+// dynamically create html structure
+function taskSheet(hours) {
+    var content = $( 
+        "<div class='row'>" +
+            "<div class='col-1 hour'>" + 
+                hours +
+            "</div>" +
+            "<div class='col-10'>" +
+                "<p class='description'></p>"+
+            "</div>" +
+            "<div class='col-1 saveBtn'>" +
+                "<i class = 'oi oi-task'></i>" +
+            "</div>" +
+        "</div>"
+    );
+    content.appendTo(".container");
+};
+
+// dynamically create operating hour task sheet
+function createTaskSheet (){
+    for (openingHour; openingHour <= closingHour; openingHour++) {
+        taskSheet(getOperatingHours(openingHour));
+    }
+};
+
+createTaskSheet();
+
+// get the current date and time
+function runTime() {
     $("#currentDay").text(moment().format("dddd, MMMM Do YYYY, h:mm:ss a"));
-}, 1000);
+    setInterval(function () {
+        $("#currentDay").text(moment().format("dddd, MMMM Do YYYY, h:mm:ss a"));
+    }, 1000);
+};
+runTime();
 
+
+function str2IntHour(strHour) {
+    var AM_PM = strHour.slice(-2);
+    var iNum = strHour.slice(0, -2);
+    var result;
+    if (strHour === "12PM") {
+        result = 12;
+    } 
+    else if (AM_PM === "PM") {
+        result = iNum + 12;
+    }
+    else {
+        result = iNum;
+    }
+    return result;
+};
+// finds the current time block
+function getCurrentTimeEvent() {
+    var currentTime = moment().format("hA");
+    var iCurTemp = str2IntHour(currentTime);
+    
+    $(".hour").each(function( i ) {
+        var evalTime = $( this ).text().trim();
+
+        // color lightblue before opening hour
+        if (iCurTemp < OPENHOUR) {
+            $( this ).next().css("background-color", "lightblue");
+        }
+        // color lightgray after closing hour
+        else if (iCurTemp > CLOSEHOUR ) {
+            $( this ).next().css("background-color", "lightgray");
+        }
+        // color operating hour
+        else {    
+            // color lightpink current hour block
+            if (evalTime === currentTime) {
+                $( this ).next().css("background-color", "lightpink");
+                backgroundFlag = AFTER;    
+            }
+            else {
+                switch(backgroundFlag) {
+                    // color lightgray past hour
+                    case BEFORE:
+                        $( this ).next().css("background-color", "lightgray");
+                        break;
+                    // color lightblue future
+                    case AFTER:
+                        $( this ).next().css("background-color", "lightblue");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    });    
+};
 var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
 var loadTasks = function() {
     tasks = JSON.parse(localStorage.getItem("tasks"));
+    
+    if (!tasks) {
+        tasks = {};
+    }
 
-    $(".schedule-event-p").each(function( index ) {
-        if(tasks[index]) {
-            $( this ).text(tasks[index]);
-        }
-    });
-};
-
-
-function getCurrentTimeEvent() {
-    var currentTime = moment().format("hA");
-
-    $(".schedule-time").each(function( index ) {
-        if ($( this ).text().trim() === currentTime) {
-            $( this ).next().css("background-color", "red");
-            backgroundFlag = AFTER;    
-        }
-        else {
-            switch(backgroundFlag) {
-                case BEFORE:
-                    $( this ).next().css("background-color", "gray");
-                    break;
-                case AFTER:
-                    $( this ).next().css("background-color", "blue");
-                    break;
-                default:
-                    break;
+    if(tasks) {
+        $(".description").each(function( index ) {
+            if(tasks[index]) {
+                $( this ).text(tasks[index]);
             }
-        }
-    });    
+        });
+    }
 };
-
-$(".schedule").on("click", "p", function() {
+loadTasks();
+    
+$(".row").on("click", ".col-10", function() {
     // get current text of p element
-    var text = $(this).text();
+    var text = $(this).children(".description").text();
 
     // replace p element with a new textarea
     var textInput =$("<textarea>").addClass("form-control").val(text);
-    $(this).replaceWith(textInput);
+    $(this).children(".description").replaceWith(textInput);
 
     // auto focus new element
     textInput.trigger("focus");
 });
 
-$("button").click( function() {
+$(".saveBtn").on("click", "i", function() {
     // get current value of textarea
-    var text = $(".form-control").val();
-    // console.log(text);
+    var pos =$(this).parent().prev().children(".form-control")
+    var sText = pos.val();
     
     // get the position 
-    var index = $(".form-control").closest(".schedule").index();
-
-    tasks[index] = text;
+    var sIndex = pos.closest(".row").index();
+    tasks[sIndex] = sText;
     saveTasks();
 
     //recreate p element
-    var taskP = $("<p>").text(text);
+    var taskP = $("<p>").text(sText);
 
     // replace textarea with new content
-    $(".form-control").replaceWith(taskP);
+    pos.closest(".form-control").replaceWith(taskP);
 });
 
 
-
-loadTasks();
 getCurrentTimeEvent();

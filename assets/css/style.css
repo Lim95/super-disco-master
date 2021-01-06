@@ -12,7 +12,12 @@ textarea{
   border-left: 1px solid black;
   padding: 10px;
 }
-
+.schedule-time {
+  background-color: lightblue;
+}
+.schedule-save   {
+  background-color: lightblue;
+}
 .jumbotron {
   text-align: center;
   background-color: transparent;
@@ -63,6 +68,9 @@ textarea{
   border-bottom-right-radius: 15px;
   background-color: #06AED5;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .saveBtn i:hover {
