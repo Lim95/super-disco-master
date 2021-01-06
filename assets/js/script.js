@@ -84,29 +84,32 @@ function getCurrentTimeEvent() {
         var evalTime = $( this ).text().trim();
 
         // color lightblue before opening hour
+
+        // $('.theClassThatsThereNow').addClass('newClassWithYourStyles').removeClass('theClassThatsTherenow');
+
         if (iCurTemp < OPENHOUR) {
-            $( this ).next().css("background-color", "lightblue");
+            $( this ).next().addClass("future").removeClass("present").removeClass("past");
         }
         // color lightgray after closing hour
         else if (iCurTemp > CLOSEHOUR ) {
-            $( this ).next().css("background-color", "lightgray");
+            $( this ).next().addClass("past").removeClass("present").removeClass("future");
         }
         // color operating hour
         else {    
             // color lightpink current hour block
             if (evalTime === currentTime) {
-                $( this ).next().css("background-color", "lightpink");
+                $( this ).next().addClass("present").removeClass("past").removeClass("future")
                 backgroundFlag = AFTER;    
             }
             else {
                 switch(backgroundFlag) {
                     // color lightgray past hour
                     case BEFORE:
-                        $( this ).next().css("background-color", "lightgray");
+                        $( this ).next().addClass("future").removeClass("present").removeClass("past");
                         break;
                     // color lightblue future
                     case AFTER:
-                        $( this ).next().css("background-color", "lightblue");
+                        $( this ).next().addClass("past").removeClass("present").removeClass("future");
                         break;
                     default:
                         break;
