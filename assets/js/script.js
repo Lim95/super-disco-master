@@ -68,10 +68,10 @@ function str2IntHour(strHour) {
         result = 12;
     } 
     else if (AM_PM === "PM") {
-        result = iNum + 12;
+        result = parseInt(iNum) + 12;
     }
     else {
-        result = iNum;
+        result = parseInt(iNum);
     }
     return result;
 };
