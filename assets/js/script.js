@@ -1,5 +1,12 @@
+const BEFORE = 0;
+const AFTER = 1;
 var tasks = {};
+var backgroundFlag = BEFORE;
 
+$("#currentDay").text(moment().format("dddd, MMMM Do YYYY, h:mm:ss a"));
+setInterval(function () {
+    $("#currentDay").text(moment().format("dddd, MMMM Do YYYY, h:mm:ss a"));
+}, 1000);
 
 var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -13,6 +20,30 @@ var loadTasks = function() {
             $( this ).text(tasks[index]);
         }
     });
+};
+
+
+function getCurrentTimeEvent() {
+    var currentTime = moment().format("hA");
+
+    $(".schedule-time").each(function( index ) {
+        if ($( this ).text().trim() === currentTime) {
+            $( this ).next().css("background-color", "red");
+            backgroundFlag = AFTER;    
+        }
+        else {
+            switch(backgroundFlag) {
+                case BEFORE:
+                    $( this ).next().css("background-color", "gray");
+                    break;
+                case AFTER:
+                    $( this ).next().css("background-color", "blue");
+                    break;
+                default:
+                    break;
+            }
+        }
+    });    
 };
 
 $(".schedule").on("click", "p", function() {
@@ -45,4 +76,7 @@ $("button").click( function() {
     $(".form-control").replaceWith(taskP);
 });
 
+
+
 loadTasks();
+getCurrentTimeEvent();
